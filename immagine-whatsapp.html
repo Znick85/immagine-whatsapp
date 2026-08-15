@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Immagine → WhatsApp</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f7f5;
+      color: #17231c;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .app {
+      width: min(920px, 100%);
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.10);
+    }
+    h1 { margin: 0 0 6px; font-size: clamp(26px, 5vw, 40px); }
+    .sub { margin: 0 0 24px; color: #66736b; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    label { display:block; font-weight: 700; margin: 14px 0 7px; }
+    input, textarea, button {
+      width: 100%;
+      font: inherit;
+      border-radius: 12px;
+    }
+    input, textarea {
+      border: 1px solid #d5ddd8;
+      padding: 12px 14px;
+      outline: none;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus { border-color: #25d366; }
+    button {
+      border: 0;
+      padding: 13px 16px;
+      margin-top: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      background: #25d366;
+      color: #063b1a;
+    }
+    button.secondary { background: #e9efeb; color: #24352b; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .preview {
+      background: #eef2ef;
+      border-radius: 18px;
+      min-height: 360px;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+    canvas {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border-radius: 14px;
+      background: white;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    }
+    .hint {
+      margin-top: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #68756d;
+    }
+    .status {
+      margin-top: 12px;
+      min-height: 20px;
+      font-size: 14px;
+      font-weight: 650;
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Immagine → WhatsApp</h1>
+    <p class="sub">Crea una semplice immagine e condividila con un numero WhatsApp specifico.</p>
+
+    <div class="grid">
+      <section>
+        <label for="number">Numero WhatsApp</label>
+        <input id="number" type="tel" placeholder="393331234567" inputmode="tel" />
+
+        <label for="title">Titolo</label>
+        <input id="title" value="Ciao!" />
+
+        <label for="message">Testo dell'immagine</label>
+        <textarea id="message">Questa è un'immagine creata dalla webapp.</textarea>
+
+        <label for="bg">Colore sfondo</label>
+        <input id="bg" type="color" value="#25d366" />
+
+        <button id="create">Crea immagine</button>
+        <button id="share" disabled>Condividi su WhatsApp</button>
+        <button id="download" class="secondary" disabled>Scarica immagine</button>
+
+        <div class="hint">
+          Inserisci il numero in formato internazionale, senza +, spazi o trattini.
+          Su smartphone la condivisione può aprire direttamente il menu di condivisione con WhatsApp.
+        </div>
+        <div id="status" class="status"></div>
+      </section>
+
+      <section class="preview">
+        <canvas id="canvas" width="1200" height="1200"></canvas>
+      </section>
+    </div>
+  </main>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const number = document.getElementById('number');
+const title = document.getElementById('title');
+const message = document.getElementById('message');
+const bg = document.getElementById('bg');
+const createBtn = document.getElementById('create');
+const shareBtn = document.getElementById('share');
+const downloadBtn = document.getElementById('download');
+const status = document.getElementById('status');
+
+function drawWrappedText(text, x, y, maxWidth, lineHeight) {
+  const words = text.split(/\s+/);
+  let line = '';
+  const lines = [];
+
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+
+  lines.forEach((l, i) => ctx.fillText(l, x, y + i * lineHeight));
+  return y + lines.length * lineHeight;
+}
+
+function createImage() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = bg.value;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Decorative white card
+  const pad = 90;
+  ctx.fillStyle = 'rgba(255,255,255,.94)';
+  ctx.beginPath();
+  ctx.roundRect(pad, pad, canvas.width - pad*2, canvas.height - pad*2, 55);
+  ctx.fill();
+
+  ctx.fillStyle = '#17231c';
+  ctx.textAlign = 'center';
+
+  ctx.font = '800 88px system-ui, sans-serif';
+  ctx.fillText(title.value || 'Ciao!', canvas.width / 2, 330);
+
+  ctx.font = '500 48px system-ui, sans-serif';
+  drawWrappedText(
+    message.value || '',
+    canvas.width / 2,
+    500,
+    canvas.width - 300,
+    72
+  );
+
+  ctx.font = '700 32px system-ui, sans-serif';
+  ctx.fillStyle = '#66736b';
+  ctx.fillText('Creato con la webapp', canvas.width / 2, 1060);
+
+  shareBtn.disabled = false;
+  downloadBtn.disabled = false;
+  status.textContent = 'Immagine pronta.';
+}
+
+function normalizedNumber() {
+  return number.value.replace(/[^\d]/g, '');
+}
+
+function downloadImage() {
+  const a = document.createElement('a');
+  a.download = 'immagine-whatsapp.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+async function shareImage() {
+  const phone = normalizedNumber();
+  if (!phone) {
+    status.textContent = 'Inserisci prima il numero WhatsApp.';
+    number.focus();
+    return;
+  }
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  const file = new File([blob], 'immagine-whatsapp.png', { type: 'image/png' });
+
+  // La Web Share API permette, sui browser compatibili, di passare
+  // l'immagine al sistema di condivisione e scegliere WhatsApp.
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: title.value || 'Immagine',
+        text: message.value || ''
+      });
+      status.textContent = 'Condivisione avviata.';
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+
+  // Fallback: apre la chat del numero specificato.
+  // Per motivi di sicurezza WhatsApp Web non consente di allegare
+  // automaticamente un file locale tramite un semplice link wa.me.
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message.value || '')}`, '_blank');
+  downloadImage();
+  status.textContent = 'WhatsApp è stato aperto. Se necessario, allega manualmente l’immagine appena scaricata.';
+}
+
+createBtn.addEventListener('click', createImage);
+downloadBtn.addEventListener('click', downloadImage);
+shareBtn.addEventListener('click', shareImage);
+
+createImage();
+</script>
+</body>
+</html>
