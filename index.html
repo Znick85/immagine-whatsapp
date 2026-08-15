@@ -6,25 +6,52 @@
 <title>Prenotazioni</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f3f5f4;color:#17231c;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-main{width:min(560px,100%);margin:auto;padding:24px 16px 40px}
-h1{font-size:30px;margin:0 0 5px} .sub{color:#66736b;margin:0 0 22px}
-.panel,.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 30px #00000012}
+body{margin:0;background:#101512;color:#17231c;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(620px,100%);margin:auto;padding:24px 16px 40px}
+h1{font-size:30px;margin:0 0 5px}.sub{color:#66736b;margin:0 0 22px}
+.panel{background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 30px #00000025}
 label{display:block;font-weight:750;margin:14px 0 7px}
 input,button{width:100%;font:inherit;border-radius:12px}
 input{padding:13px;border:1px solid #d5ddd8}
 button{border:0;padding:14px;margin-top:12px;font-weight:800;cursor:pointer}
-.primary{background:#25d366;color:#073b1b} .secondary{background:#e7ede9;color:#24352b}
+.primary{background:#25d366;color:#073b1b}.secondary{background:#e7ede9;color:#24352b}
 button:disabled{opacity:.5;cursor:not-allowed}
-.status{min-height:22px;margin-top:14px;font-size:14px;font-weight:650}
-.card{margin-top:22px} .hidden{display:none}
-.badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#e8f8ee;color:#08752f;font-weight:800;font-size:13px}
-.card h2{margin:18px 0 20px;font-size:27px}
-.row{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #edf0ee}
-.row:last-of-type{border-bottom:0} .icon{width:30px} .value{font-weight:700}
-.label{font-size:12px;color:#718078;margin-bottom:2px}
-.code{text-align:center;background:#f5f7f6;border-radius:13px;padding:12px;margin-top:18px;font-weight:800;letter-spacing:1px}
-.note{font-size:12px;color:#758078;line-height:1.45;margin-top:16px}
+.status{min-height:22px;margin-top:14px;font-size:14px;font-weight:650;color:#526158}
+.hidden{display:none}
+
+/* Card cliente */
+.booking-page{
+  margin-top:22px;
+  padding:18px 10px 10px;
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 15% 15%,rgba(216,168,78,.14),transparent 28%),
+    radial-gradient(circle at 85% 30%,rgba(36,105,75,.22),transparent 30%),
+    linear-gradient(145deg,#0b100d,#26352c);
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+}
+.booking-brand{text-align:center;color:#d8a84e;letter-spacing:2.5px;font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:700}.brand-logo{display:block;width:150px;max-height:75px;object-fit:contain;margin:0 auto 8px}.brand-name{white-space:normal}
+.cloche{display:block;font-size:31px;line-height:1;margin-bottom:7px}
+.confirm-top{text-align:center;color:#f4f1e9;margin:10px 0 18px;font-size:15px}
+.booking-card{background:#fbfaf7;color:#17231c;border-radius:24px;overflow:hidden;border:1px solid #d8a84e}
+.booking-inner{padding:25px 20px}
+.pill{display:block;width:max-content;max-width:100%;margin:0 auto 19px;padding:8px 14px;border-radius:999px;background:#eaf1eb;color:#174a36;font:700 11px system-ui,sans-serif;letter-spacing:1px}
+.guest{text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:34px;font-style:italic;font-weight:500;margin:0 0 8px}
+.code-label{text-align:center;font:11px system-ui,sans-serif;letter-spacing:2px;color:#69736c}
+.code{width:max-content;max-width:100%;margin:8px auto 23px;padding:8px 20px;border:1px solid #d8a84e;border-radius:10px;color:#bd8a32;font:800 23px system-ui,sans-serif;letter-spacing:3px}
+.details{background:#f4f1ea;border-radius:17px;padding:5px 16px}
+.detail{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #ddd8ce}
+.detail:last-child{border-bottom:0}
+.ico{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:#064832;color:#fff;display:grid;place-items:center;font-family:system-ui,sans-serif;font-size:15px}
+.dl{font:10px system-ui,sans-serif;color:#707871;letter-spacing:1px}
+.dv{font:700 16px system-ui,sans-serif;margin-top:2px}
+.important{margin-top:17px;padding:15px;border-radius:14px;background:#e9eee7;color:#264332;font:13px/1.5 system-ui,sans-serif}
+.important strong{display:block;letter-spacing:1px;margin-bottom:4px}
+.footer{background:#043c29;color:#fff;text-align:center;padding:18px;border-top:1px solid #d8a84e}
+.thanks{color:#d8a84e;font:italic 27px Georgia,"Times New Roman",serif}
+.wait{font:700 11px system-ui,sans-serif;letter-spacing:3px;margin-top:3px}
+.heart{color:#d8a84e;font-size:20px;margin-top:4px}
+.customer-note{text-align:center;color:#d9dfda;font-size:11px;margin:13px 8px 0}
 </style>
 </head>
 <body>
@@ -57,13 +84,52 @@ button:disabled{opacity:.5;cursor:not-allowed}
 </div>
 </section>
 
-<section id="card" class="card hidden">
-<span class="badge">✓ PRENOTAZIONE CONFERMATA</span>
-<h2 id="cName"></h2>
-<div class="row"><div class="icon">👥</div><div><div class="label">PERSONE</div><div class="value" id="cPeople"></div></div></div>
-<div class="row"><div class="icon">📅</div><div><div class="label">DATA</div><div class="value" id="cDate"></div></div></div>
-<div class="row"><div class="icon">🕐</div><div><div class="label">ORARIO</div><div class="value" id="cTime"></div></div></div>
-<div class="code" id="cCode"></div>
+<section id="card" class="booking-page hidden">
+  <div class="booking-brand"><img class="brand-logo" src="https://www.fattoriavalledeitempli.it/assets/logo-giallo-bianco-Dhj3UpOL.png" alt="Fattoria Valle dei Templi"><div class="brand-name">FATTORIA VALLE DEI TEMPLI</div></div>
+  <div class="confirm-top">La tua prenotazione è confermata ✓</div>
+
+  <div class="booking-card">
+    <div class="booking-inner">
+      <span class="pill">✓ PRENOTAZIONE CONFERMATA</span>
+      <h2 class="guest" id="cName"></h2>
+
+      <div class="code-label">CODICE PRENOTAZIONE</div>
+      <div class="code" id="cCode"></div>
+
+      <div class="details">
+        <div class="detail">
+          <div class="ico">▣</div>
+          <div><div class="dl">DATA</div><div class="dv" id="cDate"></div></div>
+        </div>
+        <div class="detail">
+          <div class="ico">◷</div>
+          <div><div class="dl">ORARIO</div><div class="dv" id="cTime"></div></div>
+        </div>
+        <div class="detail">
+          <div class="ico">♟</div>
+          <div><div class="dl">PERSONE</div><div class="dv" id="cPeople"></div></div>
+        </div>
+        <div class="detail">
+          <div class="ico">☎</div>
+          <div><div class="dl">TELEFONO</div><div class="dv" id="cPhone">—</div></div>
+        </div>
+      </div>
+
+      <div class="important">
+        <strong>ⓘ IMPORTANTE</strong>
+        Ti ricordiamo di mostrare questa card al personale del trenino e di presentarti
+        <b>almeno 30 minuti prima</b> dell'orario della prenotazione.
+        La prenotazione è valida per <b>tutti gli ospiti indicati nella card</b>.
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="thanks">Grazie</div>
+      <div class="wait">TI ASPETTIAMO!</div>
+      <div class="heart">♥</div>
+    </div>
+  </div>
+  <div class="customer-note">Conserva questo link per consultare la tua prenotazione.</div>
 </section>
 
 <p class="note">Il link della card contiene il codice della prenotazione. Il cliente non deve installare nulla.</p>
@@ -84,6 +150,7 @@ function renderCard(d) {
   document.getElementById('cPeople').textContent = d.persone + (String(d.persone) === '1' ? ' persona' : ' persone');
   document.getElementById('cDate').textContent = fmtDate(d.data);
   document.getElementById('cTime').textContent = d.ora;
+  document.getElementById('cPhone').textContent = d.telefono ? d.telefono : '—';
   document.getElementById('cCode').textContent = 'CODICE PRENOTAZIONE · ' + d.codice;
   document.getElementById('card').classList.remove('hidden');
 }
@@ -98,6 +165,7 @@ function cardUrl(d) {
   u.searchParams.set('persone', d.persone);
   u.searchParams.set('data', d.data);
   u.searchParams.set('ora', d.ora);
+  if (d.telefono) u.searchParams.set('telefono', d.telefono);
   return u.toString();
 }
 
