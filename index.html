@@ -12,7 +12,7 @@ h1{font-size:30px;margin:0 0 5px}.sub{color:#66736b;margin:0 0 22px}
 .panel{background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 30px #00000025}
 label{display:block;font-weight:750;margin:14px 0 7px}
 input,button{width:100%;font:inherit;border-radius:12px}
-input{padding:13px;border:1px solid #d5ddd8}
+input,select{padding:13px;border:1px solid #d5ddd8;background:#fff;color:#17231c}
 button{border:0;padding:14px;margin-top:12px;font-weight:800;cursor:pointer}
 .primary{background:#25d366;color:#073b1b}.secondary{background:#e7ede9;color:#24352b}
 button:disabled{opacity:.5;cursor:not-allowed}
@@ -50,7 +50,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .footer{background:#043c29;color:#fff;text-align:center;padding:18px;border-top:1px solid #d8a84e}
 .thanks{color:#d8a84e;font:italic 27px Georgia,"Times New Roman",serif}
 .wait{font:700 11px system-ui,sans-serif;letter-spacing:3px;margin-top:3px}
-.heart{color:#d8a84e;font-size:20px;margin-top:4px}
+.heart{color:#d8a84e;font-size:20px;margin-top:4px}.privacy-link{display:inline-block;margin-top:12px;color:#d9dfda;font:11px system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:.9}.privacy-link:hover{color:#d8a84e}
 .customer-note{text-align:center;color:#d9dfda;font-size:11px;margin:13px 8px 0}
 </style>
 </head>
@@ -70,7 +70,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 <input id="date" type="date">
 
 <label>Orario</label>
-<input id="time" type="time">
+<select id="time"><option value="12:00">12:00</option><option value="12:30">12:30</option><option value="13:00">13:00</option><option value="13:30">13:30</option><option value="14:00">14:00</option><option value="14:30">14:30</option><option value="15:00">15:00</option><option value="15:30">15:30</option><option value="16:00">16:00</option><option value="16:30">16:30</option><option value="17:00">17:00</option><option value="17:30">17:30</option><option value="18:00">18:00</option><option value="18:30">18:30</option><option value="19:00">19:00</option><option value="19:30">19:30</option><option value="20:00">20:00</option><option value="20:30">20:30</option><option value="21:00">21:00</option><option value="21:30">21:30</option><option value="22:00">22:00</option><option value="22:30">22:30</option><option value="23:00">23:00</option><option value="23:30">23:30</option></select>
 
 <label>Numero di telefono</label>
 <input id="phone" type="tel" placeholder="393331234567">
@@ -127,6 +127,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
       <div class="thanks">Grazie</div>
       <div class="wait">TI ASPETTIAMO!</div>
       <div class="heart">♥</div>
+      <a class="privacy-link"
+         href="https://www.fattoriavalledeitempli.it/"
+         target="_blank"
+         rel="noopener noreferrer">Privacy Policy</a>
     </div>
   </div>
   <div class="customer-note">Conserva questo link per consultare la tua prenotazione.</div>
