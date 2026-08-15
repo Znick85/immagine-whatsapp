@@ -50,7 +50,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .footer{background:#043c29;color:#fff;text-align:center;padding:18px;border-top:1px solid #d8a84e}
 .thanks{color:#d8a84e;font:italic 27px Georgia,"Times New Roman",serif}
 .wait{font:700 11px system-ui,sans-serif;letter-spacing:3px;margin-top:3px}
-.heart{color:#d8a84e;font-size:20px;margin-top:4px}.privacy-link{display:inline-block;margin-top:12px;color:#d9dfda;font:11px system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:.9}.privacy-link:hover{color:#d8a84e}
+.heart{color:#d8a84e;font-size:20px;margin-top:4px}.privacy-link{display:inline-block;margin-top:12px;color:#d9dfda;background:none;border:0;width:auto;padding:0;font:11px system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px;opacity:.9;cursor:pointer}.privacy-link:hover{color:#d8a84e}
+.site-link{display:block;margin-top:9px;color:#d8a84e;font:10px system-ui,sans-serif;text-decoration:none;letter-spacing:.4px}.site-link:hover{text-decoration:underline}
+.privacy-modal{position:fixed;inset:0;z-index:100;background:rgba(5,10,8,.72);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px}
+.privacy-box{position:relative;width:min(560px,100%);max-height:88vh;overflow:auto;background:#fbfaf7;color:#252a27;border-radius:22px;padding:24px 18px;box-shadow:0 25px 70px rgba(0,0,0,.45);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.privacy-close{position:absolute;right:12px;top:12px;width:38px;height:38px;border:1px solid #d8a84e;background:#fff;border-radius:8px;font-size:25px;line-height:1;cursor:pointer;color:#333}
+.privacy-kicker{color:#1d6b4b;letter-spacing:2px;font:11px Georgia,serif;margin-top:4px}
+.privacy-box h3{font:32px Georgia,serif;margin:6px 0 3px}.privacy-intro{color:#777;margin:0 0 18px}
+.privacy-item{border:1px solid #dededb;border-radius:18px;padding:16px;margin-top:12px;background:#fff}
+.privacy-item strong{display:block;margin-bottom:8px;font-size:14px}.privacy-item p{margin:0;color:#707574;font-size:14px;line-height:1.55}
 .customer-note{text-align:center;color:#d9dfda;font-size:11px;margin:13px 8px 0}
 </style>
 </head>
@@ -127,13 +135,42 @@ button:disabled{opacity:.5;cursor:not-allowed}
       <div class="thanks">Grazie</div>
       <div class="wait">TI ASPETTIAMO!</div>
       <div class="heart">♥</div>
-      <a class="privacy-link"
+      <button type="button" class="privacy-link" id="privacyOpen">Privacy Policy</button>
+      <a class="site-link"
          href="https://www.fattoriavalledeitempli.it/"
          target="_blank"
-         rel="noopener noreferrer">Privacy Policy</a>
+         rel="noopener noreferrer">www.fattoriavalledeitempli.it</a>
     </div>
   </div>
   <div class="customer-note">Conserva questo link per consultare la tua prenotazione.</div>
+  <div class="privacy-modal hidden" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+    <div class="privacy-box">
+      <button type="button" class="privacy-close" id="privacyClose" aria-label="Chiudi">×</button>
+      <div class="privacy-kicker">INFORMATIVE LEGALI</div>
+      <h3 id="privacyTitle">PRIVACY POLICY</h3>
+      <p class="privacy-intro">Informativa sintetica sul trattamento dei dati personali.</p>
+
+      <div class="privacy-item">
+        <strong>Titolare del trattamento</strong>
+        <p>Il titolare del trattamento è TERRE DEL BARONE società agricola srl, P. Iva 02995020845. Per richieste relative alla privacy puoi scrivere a info@fattoriavalledeitempli.it.</p>
+      </div>
+
+      <div class="privacy-item">
+        <strong>Dati trattati</strong>
+        <p>Il sito può trattare dati tecnici di navigazione, dati forniti volontariamente tramite form di contatto o newsletter e, solo previo consenso, dati analitici raccolti tramite Google Analytics 4.</p>
+      </div>
+
+      <div class="privacy-item">
+        <strong>Finalità</strong>
+        <p>I dati sono usati per rispondere alle richieste, gestire eventuali iscrizioni alla newsletter, garantire il funzionamento del sito e analizzare in forma aggregata l’utilizzo delle pagine quando hai accettato i cookie analitici.</p>
+      </div>
+
+      <div class="privacy-item">
+        <strong>Diritti dell’utente</strong>
+        <p>Puoi richiedere accesso, rettifica, cancellazione o limitazione del trattamento dei tuoi dati scrivendo all’indirizzo email indicato sopra.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
 <p class="note">Il link della card contiene il codice della prenotazione. Il cliente non deve installare nulla.</p>
@@ -148,13 +185,22 @@ function fmtDate(v) {
   const d = new Date(v + 'T12:00:00');
   return d.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
 }
+function fmtPhone(v) {
+  if (!v) return '—';
+  const n = String(v).replace(/\D/g,'');
+  if (n.startsWith('39') && n.length >= 11) {
+    const x = n.slice(2);
+    return '+39 ' + x.replace(/(\d{3})(\d{3})(\d+)/, '$1 $2 $3');
+  }
+  return v;
+}
 
 function renderCard(d) {
   document.getElementById('cName').textContent = d.nome;
   document.getElementById('cPeople').textContent = d.persone + (String(d.persone) === '1' ? ' persona' : ' persone');
   document.getElementById('cDate').textContent = fmtDate(d.data);
   document.getElementById('cTime').textContent = d.ora;
-  document.getElementById('cPhone').textContent = d.telefono ? d.telefono : '—';
+  document.getElementById('cPhone').textContent = fmtPhone(d.telefono);
   document.getElementById('cCode').textContent = 'CODICE PRENOTAZIONE · ' + d.codice;
   document.getElementById('card').classList.remove('hidden');
 }
@@ -228,6 +274,19 @@ document.getElementById('confirm').onclick = async () => {
   }
 };
 
+const privacyModal = document.getElementById('privacyModal');
+const privacyOpen = document.getElementById('privacyOpen');
+const privacyClose = document.getElementById('privacyClose');
+
+privacyOpen.onclick = () => privacyModal.classList.remove('hidden');
+privacyClose.onclick = () => privacyModal.classList.add('hidden');
+privacyModal.addEventListener('click', (e) => {
+  if (e.target === privacyModal) privacyModal.classList.add('hidden');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') privacyModal.classList.add('hidden');
+});
+
 // Se il cliente apre un link già creato, mostra direttamente la card.
 const p = new URLSearchParams(location.search);
 if (p.get('id') && p.get('nome')) {
@@ -236,7 +295,8 @@ if (p.get('id') && p.get('nome')) {
     nome:p.get('nome'),
     persone:p.get('persone'),
     data:p.get('data'),
-    ora:p.get('ora')
+    ora:p.get('ora'),
+    telefono:p.get('telefono') || ''
   };
   renderCard(d);
   document.querySelector('.panel').classList.add('hidden');
