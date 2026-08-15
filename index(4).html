@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prenotazioni</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f4;color:#17231c;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(560px,100%);margin:auto;padding:24px 16px 40px}
+h1{font-size:30px;margin:0 0 5px} .sub{color:#66736b;margin:0 0 22px}
+.panel,.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 30px #00000012}
+label{display:block;font-weight:750;margin:14px 0 7px}
+input,button{width:100%;font:inherit;border-radius:12px}
+input{padding:13px;border:1px solid #d5ddd8}
+button{border:0;padding:14px;margin-top:12px;font-weight:800;cursor:pointer}
+.primary{background:#25d366;color:#073b1b} .secondary{background:#e7ede9;color:#24352b}
+button:disabled{opacity:.5;cursor:not-allowed}
+.status{min-height:22px;margin-top:14px;font-size:14px;font-weight:650}
+.card{margin-top:22px} .hidden{display:none}
+.badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#e8f8ee;color:#08752f;font-weight:800;font-size:13px}
+.card h2{margin:18px 0 20px;font-size:27px}
+.row{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #edf0ee}
+.row:last-of-type{border-bottom:0} .icon{width:30px} .value{font-weight:700}
+.label{font-size:12px;color:#718078;margin-bottom:2px}
+.code{text-align:center;background:#f5f7f6;border-radius:13px;padding:12px;margin-top:18px;font-weight:800;letter-spacing:1px}
+.note{font-size:12px;color:#758078;line-height:1.45;margin-top:16px}
+</style>
+</head>
+<body>
+<main>
+<h1>Nuova prenotazione</h1>
+<p class="sub">Inserisci i dati e invia al cliente il link di conferma.</p>
+
+<section class="panel">
+<label>Nome prenotazione</label>
+<input id="name" placeholder="Mario Rossi">
+
+<label>Numero persone</label>
+<input id="people" type="number" min="1" value="2">
+
+<label>Data</label>
+<input id="date" type="date">
+
+<label>Orario</label>
+<input id="time" type="time">
+
+<label>Numero di telefono</label>
+<input id="phone" type="tel" placeholder="393331234567">
+
+<button class="primary" id="confirm">CONFERMA PRENOTAZIONE</button>
+<div id="status" class="status"></div>
+
+<div id="actions" class="hidden">
+<button class="secondary" id="copy">COPIA LINK</button>
+<button class="primary" id="wa">INVIA SU WHATSAPP</button>
+</div>
+</section>
+
+<section id="card" class="card hidden">
+<span class="badge">✓ PRENOTAZIONE CONFERMATA</span>
+<h2 id="cName"></h2>
+<div class="row"><div class="icon">👥</div><div><div class="label">PERSONE</div><div class="value" id="cPeople"></div></div></div>
+<div class="row"><div class="icon">📅</div><div><div class="label">DATA</div><div class="value" id="cDate"></div></div></div>
+<div class="row"><div class="icon">🕐</div><div><div class="label">ORARIO</div><div class="value" id="cTime"></div></div></div>
+<div class="code" id="cCode"></div>
+</section>
+
+<p class="note">Il link della card contiene il codice della prenotazione. Il cliente non deve installare nulla.</p>
+</main>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbz-lsld6w-1SQw8Ki5CNGK9zrrTXAdyVulbVoPjzAGsu7QRRcddpO6yE5FyGzcSmGh-/exec';
+let lastUrl = '';
+let lastData = null;
+
+function fmtDate(v) {
+  const d = new Date(v + 'T12:00:00');
+  return d.toLocaleDateString('it-IT', {weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+}
+
+function renderCard(d) {
+  document.getElementById('cName').textContent = d.nome;
+  document.getElementById('cPeople').textContent = d.persone + (String(d.persone) === '1' ? ' persona' : ' persone');
+  document.getElementById('cDate').textContent = fmtDate(d.data);
+  document.getElementById('cTime').textContent = d.ora;
+  document.getElementById('cCode').textContent = 'CODICE PRENOTAZIONE · ' + d.codice;
+  document.getElementById('card').classList.remove('hidden');
+}
+
+function cardUrl(d) {
+  // Il link punta alla stessa app e contiene i dati della card.
+  const u = new URL(location.href);
+  u.search = '';
+  u.hash = '';
+  u.searchParams.set('id', d.codice);
+  u.searchParams.set('nome', d.nome);
+  u.searchParams.set('persone', d.persone);
+  u.searchParams.set('data', d.data);
+  u.searchParams.set('ora', d.ora);
+  return u.toString();
+}
+
+document.getElementById('confirm').onclick = async () => {
+  const data = {
+    nome: document.getElementById('name').value.trim(),
+    persone: document.getElementById('people').value,
+    data: document.getElementById('date').value,
+    ora: document.getElementById('time').value,
+    telefono: document.getElementById('phone').value.replace(/\D/g,'')
+  };
+
+  const status = document.getElementById('status');
+
+  if (!data.nome || !data.persone || !data.data || !data.ora || !data.telefono) {
+    status.textContent = 'Compila tutti i campi.';
+    return;
+  }
+
+  status.textContent = 'Salvataggio prenotazione...';
+  document.getElementById('confirm').disabled = true;
+
+  try {
+    const response = await fetch(API, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) throw new Error(result.error || 'Errore Apps Script');
+
+    data.codice = result.codice;
+    lastData = data;
+    lastUrl = cardUrl(data);
+
+    renderCard(data);
+    document.getElementById('actions').classList.remove('hidden');
+
+    document.getElementById('copy').onclick = async () => {
+      await navigator.clipboard.writeText(lastUrl);
+      status.textContent = 'Link copiato.';
+    };
+
+    document.getElementById('wa').onclick = () => {
+      const msg = 'Ciao ' + data.nome + ', la tua prenotazione è confermata. Puoi visualizzare la card qui: ' + lastUrl;
+      window.open('https://wa.me/' + data.telefono + '?text=' + encodeURIComponent(msg), '_blank');
+    };
+
+    status.textContent = 'Prenotazione salvata nel Google Sheet.';
+  } catch (err) {
+    status.textContent = 'Errore: ' + err.message;
+  } finally {
+    document.getElementById('confirm').disabled = false;
+  }
+};
+
+// Se il cliente apre un link già creato, mostra direttamente la card.
+const p = new URLSearchParams(location.search);
+if (p.get('id') && p.get('nome')) {
+  const d = {
+    codice:p.get('id'),
+    nome:p.get('nome'),
+    persone:p.get('persone'),
+    data:p.get('data'),
+    ora:p.get('ora')
+  };
+  renderCard(d);
+  document.querySelector('.panel').classList.add('hidden');
+  document.querySelector('h1').textContent = 'La tua prenotazione';
+  document.querySelector('.sub').textContent = 'Dettagli della prenotazione confermata.';
+}
+</script>
+</body>
+</html>
