@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#25D366">
+<title>Crea e condividi immagine</title>
+<style>
+:root { font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+* { box-sizing:border-box; }
+body { margin:0; background:#f4f6f5; color:#17231c; }
+main { width:min(680px,100%); margin:auto; padding:20px 16px 40px; }
+h1 { font-size:30px; margin:8px 0 4px; }
+.sub { color:#66736b; margin:0 0 20px; }
+.card { background:#fff; border-radius:20px; padding:18px; box-shadow:0 8px 30px #00000012; }
+label { display:block; font-weight:750; margin:14px 0 7px; }
+input,textarea,button { width:100%; font:inherit; border-radius:13px; }
+input,textarea { padding:13px; border:1px solid #d5ddd8; background:#fff; }
+textarea { min-height:105px; resize:vertical; }
+button { border:0; padding:15px; margin-top:12px; font-weight:800; cursor:pointer; }
+.primary { background:#25D366; color:#073b1b; }
+.secondary { background:#e8eeea; color:#213329; }
+canvas { width:100%; height:auto; display:block; margin-top:18px; border-radius:18px; box-shadow:0 7px 22px #0002; }
+.status { min-height:22px; margin:12px 2px 0; font-size:14px; font-weight:650; }
+.note { font-size:13px; line-height:1.45; color:#6b776f; margin-top:15px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Crea e condividi</h1>
+  <p class="sub">Genera l'immagine e passala direttamente al menu Condividi del telefono.</p>
+
+  <div class="card">
+    <label for="title">Titolo</label>
+    <input id="title" value="Ciao!">
+
+    <label for="text">Messaggio</label>
+    <textarea id="text">Questa è la mia immagine.</textarea>
+
+    <label for="bg">Colore</label>
+    <input id="bg" type="color" value="#25d366">
+
+    <button class="primary" id="make">Crea immagine</button>
+    <button class="primary" id="share">Condividi immagine</button>
+    <button class="secondary" id="save">Salva immagine</button>
+
+    <canvas id="canvas" width="1080" height="1080"></canvas>
+    <div id="status" class="status"></div>
+
+    <p class="note">
+      Sul telefono, “Condividi immagine” usa il menu di condivisione nativo.
+      Da lì scegli WhatsApp e poi il destinatario. Il browser non può imporre
+      contemporaneamente a WhatsApp un numero specifico e un allegato locale.
+    </p>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $('canvas');
+const ctx = canvas.getContext('2d');
+
+function wrap(text, maxWidth) {
+  const words = text.trim().split(/\s+/);
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else line = test;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+function draw() {
+  const bg = $('bg').value;
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,1080,1080);
+
+  ctx.fillStyle = 'rgba(255,255,255,.95)';
+  ctx.beginPath();
+  ctx.roundRect(70,70,940,940,48);
+  ctx.fill();
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#17231c';
+  ctx.font = '800 78px system-ui';
+  ctx.fillText($('title').value || 'Ciao!',540,300);
+
+  ctx.font = '500 46px system-ui';
+  const lines = wrap($('text').value || '',800);
+  const start = 480 - ((lines.length-1)*34);
+  lines.slice(0,7).forEach((line,i)=>ctx.fillText(line,540,start+i*68));
+
+  ctx.font = '650 27px system-ui';
+  ctx.fillStyle = '#718078';
+  ctx.fillText('Creato dal telefono',540,930);
+
+  $('status').textContent = 'Immagine pronta.';
+}
+
+function blobFromCanvas() {
+  return new Promise(resolve => canvas.toBlob(resolve,'image/png',1));
+}
+
+async function share() {
+  draw();
+  const blob = await blobFromCanvas();
+  const file = new File([blob],'immagine.png',{type:'image/png'});
+
+  if (navigator.share) {
+    try {
+      if (!navigator.canShare || navigator.canShare({files:[file]})) {
+        await navigator.share({
+          files:[file],
+          title:$('title').value || 'Immagine'
+        });
+        $('status').textContent = 'Condivisione aperta.';
+        return;
+      }
+    } catch(e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+
+  $('status').textContent =
+    'Questo browser non supporta la condivisione diretta del file. Usa “Salva immagine” e condividila dalla galleria.';
+}
+
+async function save() {
+  draw();
+  const blob = await blobFromCanvas();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'immagine.png';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  $('status').textContent = 'Immagine salvata.';
+}
+
+$('make').onclick = draw;
+$('share').onclick = share;
+$('save').onclick = save;
+$('title').oninput = draw;
+$('text').oninput = draw;
+$('bg').oninput = draw;
+draw();
+</script>
+</body>
+</html>
