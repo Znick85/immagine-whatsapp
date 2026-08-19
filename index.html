@@ -126,9 +126,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
       <div class="important">
         <strong>ⓘ IMPORTANTE</strong>
-        Ti ricordiamo di mostrare questa card al personale del trenino e di presentarti
+        Ti ricordiamo di mostrare questa card al personale del trenino o del minibus e di presentarti
         <b>almeno 30 minuti prima</b> dell'orario della prenotazione.
-        La prenotazione è valida per <b>tutti gli ospiti indicati nella card</b>.
+        La prenotazione è valida per il <b>numero di ospiti indicati nella prenotazione</b>.
       </div>
     </div>
 
@@ -263,7 +263,7 @@ document.getElementById('confirm').onclick = async () => {
     };
 
     document.getElementById('wa').onclick = () => {
-      const msg = 'Ciao ' + data.nome + ', la tua prenotazione è confermata. Puoi visualizzare la card qui: ' + lastUrl;
+      const msg = 'Ciao ' + data.nome + ', la tua prenotazione è confermata. Puoi visualizzare la card qui: ' + lastUrl + '\n\nTi ricordiamo di mostrare questa card al personale del trenino o del minibus e di presentarti almeno 30 minuti prima dell'orario della prenotazione. La prenotazione è valida per il numero di ospiti indicati nella prenotazione.';
       window.open('https://wa.me/' + data.telefono + '?text=' + encodeURIComponent(msg), '_blank');
     };
 
