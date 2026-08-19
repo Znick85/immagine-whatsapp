@@ -197,26 +197,20 @@ function fmtPhone(v) {
 }
 
 function renderCard(d) {
-  document.getElementById('cName').textContent = d.nome;
+  document.getElementById('cName').textContent = d.nome || '';
   document.getElementById('cPeople').textContent = d.persone + (String(d.persone) === '1' ? ' persona' : ' persone');
   document.getElementById('cDate').textContent = fmtDate(d.data);
-  document.getElementById('cTime').textContent = d.ora;
+  document.getElementById('cTime').textContent = d.ora || '';
   document.getElementById('cPhone').textContent = fmtPhone(d.telefono);
   document.getElementById('cCode').textContent = 'CODICE PRENOTAZIONE · ' + d.codice;
   document.getElementById('card').classList.remove('hidden');
 }
 
 function cardUrl(d) {
-  // Il link punta alla stessa app e contiene i dati della card.
   const u = new URL(location.href);
   u.search = '';
   u.hash = '';
   u.searchParams.set('id', d.codice);
-  u.searchParams.set('nome', d.nome);
-  u.searchParams.set('persone', d.persone);
-  u.searchParams.set('data', d.data);
-  u.searchParams.set('ora', d.ora);
-  if (d.telefono) u.searchParams.set('telefono', d.telefono);
   return u.toString();
 }
 
@@ -290,22 +284,33 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') privacyModal.classList.add('hidden');
 });
 
-// Se il cliente apre un link già creato, mostra direttamente la card.
-const p = new URLSearchParams(location.search);
-if (p.get('id') && p.get('nome')) {
-  const d = {
-    codice:p.get('id'),
-    nome:p.get('nome'),
-    persone:p.get('persone'),
-    data:p.get('data'),
-    ora:p.get('ora'),
-    telefono:p.get('telefono') || ''
-  };
-  renderCard(d);
+// Il cliente apre un link con SOLO il codice: i dati vengono letti sempre dal Google Sheet.
+async function loadCustomerBooking() {
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) return;
+
   document.querySelector('.panel').classList.add('hidden');
   document.querySelector('h1').textContent = 'La tua prenotazione';
-  document.querySelector('.sub').textContent = 'Dettagli della prenotazione confermata.';
+  document.querySelector('.sub').textContent = 'Dettagli della prenotazione.';
+  const card = document.getElementById('card');
+  card.classList.remove('hidden');
+
+  try {
+    const response = await fetch(API + '?id=' + encodeURIComponent(id));
+    const result = await response.json();
+    if (!result.success || !result.prenotazione) throw new Error(result.error || 'Prenotazione non trovata');
+
+    const d = result.prenotazione;
+    if (String(d.stato).toLowerCase() === 'cancellata') {
+      card.innerHTML = '<div class="booking-card"><div class="booking-inner" style="text-align:center"><div style="font-size:55px;margin:10px 0">✕</div><h2 class="guest">Prenotazione cancellata</h2><p style="color:#68736d;line-height:1.5">Questa prenotazione non è più valida.</p><div class="code" style="margin-bottom:0">'+d.codice+'</div></div></div>';
+      return;
+    }
+    renderCard(d);
+  } catch (err) {
+    card.innerHTML = '<div class="booking-card"><div class="booking-inner" style="text-align:center"><div style="font-size:42px">⚠️</div><h2 class="guest">Prenotazione non disponibile</h2><p style="color:#68736d;line-height:1.5">'+err.message+'</p></div></div>';
+  }
 }
+loadCustomerBooking();
 </script>
 </body>
 </html>
